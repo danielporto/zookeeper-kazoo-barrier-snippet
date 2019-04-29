@@ -1,0 +1,83 @@
+version: '3'
+
+networks:
+    net:
+      driver: bridge
+
+services:
+# Zookeeper ensemble
+#    zoo1:
+#        image: danielporto/zookeeper:3.5.3-beta
+#        restart: always
+#        ports:
+#            - 2181:2181
+#        environment:
+#            ZOO_MY_ID: 1
+#            ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
+#        networks:
+#            - net
+#    zoo2:
+#        image: danielporto/zookeeper:3.5.3-beta
+#        restart: always
+#        ports:
+#            - 2182:2181
+#        environment:
+#            ZOO_MY_ID: 2
+#            ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
+#        networks:
+#            - net
+#    zoo3:
+#        image: danielporto/zookeeper:3.5.3-beta
+#        restart: always
+#        ports:
+#            - 2183:2181
+#        environment:
+#            ZOO_MY_ID: 3
+#            ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
+#        networks:
+#            - net
+
+# Zookeeper single instance
+    zoo1:
+        image: danielporto/zookeeper:3.5.3-beta
+        restart: always
+        ports:
+            - 2181:2181
+        environment:
+            ZOO_MY_ID: 1
+            ZOO_SERVERS: server.1=zoo1:2888:3888
+        networks:
+            - net
+
+    client1:
+        build: .
+        image: barrier_snippet
+        command: sh -c 'sleep 5 && python src/Main.py'
+        environment:
+            PYTHONUNBUFFERED: 1
+        networks:
+            - net
+        depends_on:
+            - zoo1
+
+    client2:
+        build: .
+        image: barrier_snippet
+        command: sh -c 'sleep 10 && python src/Main.py'
+        environment:
+            PYTHONUNBUFFERED: 1
+        networks:
+            - net
+        depends_on:
+            - zoo1
+
+    client3:
+        build: .
+        image: barrier_snippet
+        command: sh -c 'sleep 15 && python src/Main.py'
+        environment:
+            PYTHONUNBUFFERED: 1
+        networks:
+            - net
+        depends_on:
+            - zoo1
